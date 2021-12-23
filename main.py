@@ -1,7 +1,9 @@
 ## Author:  Owen Cocjin
-## Version: 0.1
+## Version: 0.2
 ## Date:    2021.12.23
 ## Description:    Tests for network interference
+## Updates:
+##  - Sort the printed ports (client side)
 from progmenu import MENU
 from misc import iToB,bToI
 from math import ceil
@@ -148,6 +150,7 @@ def main():
 		thresh=total//4  #Highest a sum can be (inclusive)
 		for r in sums.items():
 			if 0<r[1]<=thresh:
+				globe.all_lists[r[0]].sort()
 				screen.nnotify(f"{r[0]}: {globe.all_lists[r[0]]}")
 		input()
 		screen.exitGrid()

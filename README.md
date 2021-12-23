@@ -16,6 +16,9 @@ python main.py -i <ip of server>
 ```
 This will display a graph on the client and start making connections. The default parameters are to scan ports 1-1023 with a chunk size of 100. All defaults can be found in the help menu `python main.py -h`. The client will inform you when it's done.
 
+## Updates:
+- [2021.12.23]: Sort the output ports
+
 ## Notes:
 - Testing on localhost is somewhat unstable when scanning ports >=1024. This is due to the fact that any non-well-known port is considered ephemeral and the client may use the same port it's trying to test.
 - If testing on localhost, ports >=1024 may cause false "closed" results due to the kernel assigning the client an ephemeral port that the server is trying to scan.
