@@ -25,9 +25,11 @@ This will display a graph on the client and start making connections. The defaul
 ## Shortcomings:
 - If one of either client/server stops without warning, there is no way for the other to tell the connection has been lost. This will be fixed by converting the data port to a heartbeat port after complete handshake.
 
-## Future Implemetations:
-- Of all the results, print only the smallest ones (ex. If there are 2 dropped and 998 acceptes, only print the dropped ports)
+## Future Implementations:
+- ~~Of all the results, print only the smallest ones (ex. If there are 2 dropped and 998 acceptes, only print the dropped ports)~~ **Done!**
 - Add a heartbeat to the data port to prevent messy, accidental kills
+- Allow ports to be randomly assigned. This can preferably prevent any single client from being blocked if the network blocks a range of ports
+
 
 ## Current Bugs:
 
