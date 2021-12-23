@@ -4,7 +4,7 @@
 ## Installation:
 Plug n' play! Download the repo and run `main.py`!
 
-#Usage:
+## Usage:
 Most configuration is done by the client side. This script is meant to test network configurations, so control over a remote server is expected.
 On the server, run:
 ```
