@@ -1,16 +1,24 @@
+#!/usr/bin/python3
 ## Author:  Owen Cocjin
-## Version: 0.2
-## Date:    2021.12.23
+## Version: 0.3
+## Date:    2022.02.27
 ## Description:    Tests for network interference
 ## Updates:
-##  - Sort the printed ports (client side)
+##  - Fixed error output when hanshake fails to timeout
+##  - Won't let client start without enough permissions for well-known ports
+##  - Implemented outputting to file
 from progmenu import MENU
 from misc import iToB,bToI
 from math import ceil
-import time,threading,sys
+import time,threading,sys,os
 import grid,server,client,data,globe
 import menuentries
-PARSER=MENU.parse(True)
+
+try:
+	PARSER=MENU.parse(True)
+except KeyboardInterrupt:
+	print('\r\033[K',end='')
+	exit(1)
 
 MY_NAME=__file__[__file__.rfind('/')+1:-3]
 S=7
@@ -20,6 +28,12 @@ def main():
 	#Determine if client or server
 	if PARSER["server"]:
 		print(f"[|X:{MY_NAME}]: Running as server...")
+		#Check for permissions if we're testing well-known ports
+		if (1<=PARSER["start"]<=1024 or 1<=PARSER["end"]<=1024)\
+			and\
+			os.getuid()!=0:
+			print(f"[|X:{MY_NAME}]: Can't start; Not enough permissions for port range {PARSER['start']}-{PARSER['end']}")
+			return 1
 		#Do handshake
 		try:
 			serv,cli,info_dict=server.doHandshake(PARSER["ip"],PARSER["port"])
@@ -97,6 +111,10 @@ def main():
 			screen.nnotify(f"  [{e.message}]",colour='\033[41m')
 			screen.getLeave()
 			return 2
+		except TimeoutError:
+			screen.notify(f"Server timedout on port {PARSER['port']}!",colour='\033[41m')
+			screen.getLeave()
+			return 3
 		if cli==None:
 			screen.notify(f"Couldn't complete handshake!",colour='\033[41m')
 			return 1
@@ -146,12 +164,22 @@ def main():
 		for t in thread_list:
 			t.join()
 		screen.notify("Done! Press [Enter] to finish",colour='\033[42m')
+
 		#Print results
 		thresh=total//4  #Highest a sum can be (inclusive)
-		for r in sums.items():
+		for r in sums.items():  #sums is a dict; Ex: {"accept":20}; 20 accepted packets
+			globe.all_lists[r[0]].sort()  #Sort all lists because we might save them later
 			if 0<r[1]<=thresh:
-				globe.all_lists[r[0]].sort()
 				screen.nnotify(f"{r[0]}: {globe.all_lists[r[0]]}")
+		#Save results if option is set
+		if PARSER["outfile"]:
+			with open(PARSER["outfile"],'w') as f:
+				f.write(f"""__--++* DropDetect Report *++--__\n
+Port range: {PARSER["start"]} - {PARSER["end"]}\n\n""")
+				for r in globe.all_lists.items():
+					# screen.nnotify(f"""{r[0]}: {r[1]}""")
+					f.write(f"{r[0]}: {', '.join([str(i) for i in r[1]])}\n")
+			screen.nnotify(f"Saved output to {PARSER['outfile']}!")
 		input()
 		screen.exitGrid()
 

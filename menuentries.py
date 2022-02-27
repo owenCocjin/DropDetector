@@ -1,22 +1,34 @@
 ## Author:  Owen Cocjin
-## Version: 0.1
-## Date:    2021.12.23
+## Version: 0.2
+## Date:    2022.02.27
 ## Description:    Menu entries for progmenu
 ## Notes:
+## Updates:
+##  - Added -o
 from progmenu import EntryArg,EntryFlag
+from os.path import isfile
 
 def toIFunc(i):
 	'''Converts entry to int'''
 	return int(i)
+def outfileFunc(o):
+	'''Writes results to a file'''
+	if isfile(o):
+		print(f"\033[93m[|X:menuentries:outfileFunc]\033[0m: The file {o} exists! Overwrite? ", end='')
+		if input().lower() not in ['y',"yes"]:
+			exit()  #Not sure if this is bad practice to exit here lol
+	return o
+
 def helpFunc():
-	print("""dropdetector.py [cdehipst]
+	print("""dropdetector.py [-cdehiopst]
 * Tests if a network is dropping packets, or interfering in any way *
   -c; --chunk=<c>:   Number of ports to test per socket
   -d; --delay=<d>:   Seconds to wait between failed connections (default 1).
                      Can be a float
-  -e; --end=<e>:     End of port range; Inclusive (default 1025)
+  -e; --end=<e>:     End of port range; Exclusive (default 1025)
   -h; --help:        Prints this page
   -i; --ip=<i>:      Server IP (default 0.0.0.0)
+  -o; --output=<o>:  Save results to file <o>
   -p; --port=<p>:    Data port (default 8080).
                      This port MUST NOT be blocked
   -s; --server:      Run as server
@@ -56,3 +68,4 @@ EntryArg("port",['p',"port"],toIFunc,default=8080)  #Data port
 EntryFlag("server",['s',"server"],lambda *_:True)  #If this is a server
 EntryArg("start",['r',"start"],toIFunc,default=1)  #Start of port range
 EntryArg("timeout",['t',"timeout"],toIFunc,default=3)  #Port timeout
+EntryArg("outfile",['o',"output"],outfileFunc,default=None)  #Output file
