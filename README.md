@@ -21,7 +21,6 @@ This will display a graph on the client and start making connections. The defaul
   - Sort the output ports
 - [2022.02.27]:
   - Added --output, allowing you to write results to a file
-  - Prevents client from starting if testing well-known ports without proper permissions
 
 ## Notes:
 - Testing on localhost is somewhat unstable when scanning ports >=1024. This is due to the fact that any non-well-known port is considered ephemeral and the client may use the same port it's trying to test.

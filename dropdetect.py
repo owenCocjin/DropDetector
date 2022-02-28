@@ -5,7 +5,6 @@
 ## Description:    Tests for network interference
 ## Updates:
 ##  - Fixed error output when hanshake fails to timeout
-##  - Won't let client start without enough permissions for well-known ports
 ##  - Implemented outputting to file
 from progmenu import MENU
 from misc import iToB,bToI
@@ -28,12 +27,6 @@ def main():
 	#Determine if client or server
 	if PARSER["server"]:
 		print(f"[|X:{MY_NAME}]: Running as server...")
-		#Check for permissions if we're testing well-known ports
-		if (1<=PARSER["start"]<=1024 or 1<=PARSER["end"]<=1024)\
-			and\
-			os.getuid()!=0:
-			print(f"[|X:{MY_NAME}]: Can't start; Not enough permissions for port range {PARSER['start']}-{PARSER['end']}")
-			return 1
 		#Do handshake
 		try:
 			serv,cli,info_dict=server.doHandshake(PARSER["ip"],PARSER["port"])
@@ -87,6 +80,18 @@ def main():
 		screen.write("0")
 		screen.write("of")
 		screen.write(ceil(total/PARSER["chunk"]))
+
+		#This doesn't actually help that much!
+		#I'll have to get the server to check it's permissions instead
+		#Check for permissions if we're testing well-known ports
+		# if (1<=PARSER["start"]<=1024 or 1<=PARSER["end"]<=1024)\
+		# 	and\
+		# 	os.getuid()!=0:
+		# 	screen.notify(f"Can't start:",colour="\033[41m")
+		# 	screen.nnotify(f"Not enough permissions for port range {PARSER['start']}-{PARSER['end']}",colour="\033[41m")
+		# 	screen.getLeave()
+		# 	return 1
+
 		#Assemble args into a dict.
 		#Each key+value must be a byte
 		info_dict={}  #Any defaults are set by menuentries
@@ -163,9 +168,9 @@ def main():
 		done_threads=0
 		for t in thread_list:
 			t.join()
-		screen.notify("Done! Press [Enter] to finish",colour='\033[42m')
 
 		#Print results
+		screen.notify("Results:")
 		thresh=total//4  #Highest a sum can be (inclusive)
 		for r in sums.items():  #sums is a dict; Ex: {"accept":20}; 20 accepted packets
 			globe.all_lists[r[0]].sort()  #Sort all lists because we might save them later
@@ -180,6 +185,8 @@ Port range: {PARSER["start"]} - {PARSER["end"]}\n\n""")
 					# screen.nnotify(f"""{r[0]}: {r[1]}""")
 					f.write(f"{r[0]}: {', '.join([str(i) for i in r[1]])}\n")
 			screen.nnotify(f"Saved output to {PARSER['outfile']}!")
+
+		screen.nnotify("Done! Press [Enter] to finish",colour='\033[42m')
 		input()
 		screen.exitGrid()
 
