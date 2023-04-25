@@ -56,6 +56,7 @@ def helpFunc():
       Too low of a delay will cause falsely closed ports.
       Too low of a timeout will cause SRVERRs and ultimately hangs the client.
       In localhost testing, a delay<0.6 or a timeout<2 triggers these errors
+    - Setting too big of a delay will cause the 
     - Setting too big of a port range (such as ~40k) will cause a severe desync of ports
     - The reason the end port is excluded is because it's just a lot cleaner when excluding it""")
 
