@@ -1,6 +1,6 @@
 ## Author:  Owen Cocjin
-## Version: 0.1
-## Date:    2021.12.23
+## Version: 0.2
+## Date:    2023.04.25
 ## Description:    Holds client functions
 ## Notes:
 ##  - info_dict in the handshake must be {'b\xNN':b'\xVALUE'}

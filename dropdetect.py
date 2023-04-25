@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 ## Author:  Owen Cocjin
-## Version: 0.3
-## Date:    2022.02.27
+## Version: 0.4
+## Date:    2023.04.25
 ## Description:    Tests for network interference
 ## Updates:
 ##  - Fixed error output when hanshake fails to timeout

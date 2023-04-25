@@ -1,6 +1,6 @@
 ## Author:  Owen Cocjin
-## Version: 0.1
-## Date:    2021.12.23
+## Version: 0.2
+## Date:    2023.04.25
 ## Description:    Holds global resources
 import threading
 

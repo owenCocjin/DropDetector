@@ -1,6 +1,6 @@
 ## Author:  Owen Cocjin
-## Version: 0.2
-## Date:    2022.02.27
+## Version: 0.3
+## Date:    2023.04.25
 ## Description:    Menu entries for progmenu
 ## Notes:
 ## Updates:
