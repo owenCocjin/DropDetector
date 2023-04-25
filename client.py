@@ -109,6 +109,12 @@ def minion_thread(data_addr,ports,timeout,delay,screen,sums):
 	# toret={"close":[],"drop":[],"srverr":[]}
 	for p in ports:
 		# print(f"[|X:{MY_NAME}:minion_thread]: Trying port {p}...")
+		#Make sure the globe.hb_event isn't set, or else we need to die
+		if globe.hb_event.is_set():
+			# print(f"[|X:{MY_NAME}:tryPort]: Heartbeat died and so shall I!")
+			screen.notify("Heartbeat died and so shall I!",colour='\033[41m')
+			return False
+
 		res=tryPort(my_id,data_addr,p,timeout,delay)
 		if res==0:  #Accepted
 			my_sums["accept"]+=1
@@ -145,22 +151,26 @@ def heartbeat(cli,bps=3):
 	globe.cli_err_unit.setPayload(b'OK')
 	#Start loop
 	while True:
-		#Send OK to server
-		cli.send(globe.cli_err_unit.raw)
-		#Receive OK
-		reply=data.recvUnit(cli)
-		if not reply:
-			print(f"[|X:{MY_NAME}:heartbeat]: Server died")
-			return 1
-		if reply.status:
-			print(f"<X| {reply.payload.decode()}")
-			#Sleep the bps
-			time.sleep(bps)
-			continue
-		#Error
-		print(f"[|X:{MY_NAME}:heartbeat]: Server sent error: {reply.payload.decode()}")
-		return 2
-
+		try:
+			#Send OK to server
+			cli.send(globe.cli_err_unit.raw)
+			#Receive OK
+			reply=data.recvUnit(cli)
+			if not reply:
+				# print(f"[|X:{MY_NAME}:heartbeat]: Server died")
+				return 1
+			if reply.status:
+				# print(f"<X| {reply.payload.decode()}")
+				#Sleep the bps
+				time.sleep(bps)
+				continue
+			#Error
+			# print(f"[|X:{MY_NAME}:heartbeat]: Server sent error: {reply.payload.decode()}")
+			return 2
+		except Exception as e:
+			# print(f"[|X:{MY_NAME}:heartbeat]: {e.__class__.__name__}: {e}")
+			globe.hb_event.set()
+			return 3
 
 if __name__=="__main__":
 	addr="0.0.0.0"

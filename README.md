@@ -36,6 +36,7 @@ This will display a graph on the client and start making connections. The defaul
 - Add a heartbeat to the data port to prevent messy, accidental kills
 - Allow ports to be randomly assigned. This can preferably prevent any single client from being blocked if the network blocks a range of ports
 - Let the user decide if they want to output only results within range. Either this, or condense sequential ports into a range when outputting to file (write "1-50" instead of the full list of ports)
+- Create a reverse-data port in case there is no inbound (server-side) port that can reasonably be found. This way, the server will create the heartbeat connection with the client, which should be unblocked by default as it's an outbound connection
 
 
 ## Current Bugs:
@@ -43,6 +44,7 @@ This will display a graph on the client and start making connections. The defaul
 ### Client
 - ~~**[cli.01]**: Client crashes when scanning a server that is actively using port 443~~ **Fixed**: Caught error and return to client as srverr.
 - ~~**[cli.02]**: Somewhat commonly, the client will spit out an "Index out of range" error while parsing the who_byte, indicating it didn't receive any data from the server. This error was found when scanning port 443 while it was occupied by an Apache server. I believe the error is caused by the server simply closing the bad connection (?).~~ **Fixed**: Before data.recvUnit (which caused the error) converts the bytes to Unit, check if it received an empty byte. This indicates a closed remote socket, so return None and allow caller to handle.
+- **[cli.03]**: The "delay" option seems to directly affect the time the threads wait once they're done. This is wrong because the "delay" should only affect failures in the sockets
 
 ### Server
 - ~~**[srv.01]**: Using too high of a chunk size causes threads to crash (due to an overflow-like bug). This is caused by the break of data during transmission. The server sends (or client receives) what should be one unit, as 2 distinct units, causing an invalid who byte for the second unit, followed by a crash. The client detects an invalid port response and abruptly closes the data port. Instead, the client can send a retry message which will allow the server to resend the data.~~ **Fixed**: Due to TCP breaking packets apart during transmission, client only received partial units. Created a function to receive exactly N bytes from server to ensure full unit transmission.

@@ -2,7 +2,7 @@
 ## Version: 0.1
 ## Date:    2021.12.23
 ## Description:    Holds server functions
-import socket,multiprocessing,time,os
+import socket,time,os,threading
 import data,globe
 from misc import iToB,bToI
 
@@ -112,6 +112,10 @@ def minion_thread(data_addr,ports,timeout):
 	for p in port_list:
 		#print(f"[|X:{MY_NAME}:minion_thread]: Trying port {p}...")
 		try:
+			#Make sure the globe.hb_event isn't set, or else we need to die
+			if globe.hb_event.is_set():
+				print(f"[|X:{MY_NAME}:tryPort]: Heartbeat died and so shall I!")
+				return False
 			tryPort(data_addr,p,timeout*timeout_ext)
 		except OSError as e:
 			if e.errno==98:  #Port in use
@@ -131,28 +135,41 @@ def heartbeat(serv,cli,heartbeat_id,bps=3):
 	#Start loop
 	while True:
 		#Receive from client
-		recv=data.recvUnit(cli)
-		if not recv:
-			print(f"[|X:{MY_NAME}:heartbeat]: Client died")
-			return 1
-		if recv.content!=4:
-			print(f"[|X:{MY_NAME}:heartbeat]: Bad heartbeat from client")
-			#Reply with close
-			reply=data.Unit(b'\x44'+heartbeat_id)
-			reply.setPayload(b"INCORRECT_HEARTBEAT")
-			cli.send()
-			serv.close()
-			return 1
-		elif not recv.status:
-			print(f"[|X:{MY_NAME}:heartbeat]: Client sent error: {recv.payload.decode()}")
-			return 2
-		else:
-			print(f"|X> {recv.payload.decode()}")
-		#Send OK or error
-		cli.send(globe.serv_err_unit.raw)
-		#Close thread if error is bad
-		if not globe.serv_err_unit.status:
-			return 2
+		try:
+			recv=data.recvUnit(cli)
+			if not recv:
+				print(f"[|X:{MY_NAME}:heartbeat]: Client died")
+				#Set hb_event
+				globe.hb_event.set()
+				return 1
+			if recv.content!=4:
+				print(f"[|X:{MY_NAME}:heartbeat]: Bad heartbeat from client")
+				#Reply with close
+				reply=data.Unit(b'\x44'+heartbeat_id)
+				reply.setPayload(b"INCORRECT_HEARTBEAT")
+				cli.send()
+				serv.close()
+				#Set hb_event
+				globe.hb_event.set()
+				return 1
+			elif not recv.status:
+				print(f"[|X:{MY_NAME}:heartbeat]: Client sent error: {recv.payload.decode()}")
+				#Set hb_event
+				globe.hb_event.set()
+				return 2
+			else:
+				print(f"|X> {recv.payload.decode()}")
+			#Send OK or error
+			cli.send(globe.serv_err_unit.raw)
+			#Close thread if error is bad
+			if not globe.serv_err_unit.status:
+				#Set hb_event
+				globe.hb_event.set()
+				return 2
+		except Exception as e:
+			print(f"[|X:{MY_NAME}:heartbeat]: {e.__class__.__name__}: {e}")
+			globe.hb_event.set()
+			return 3
 
 if __name__=="__main__":
 	addr="0.0.0.0"

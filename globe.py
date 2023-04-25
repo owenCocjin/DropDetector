@@ -13,3 +13,5 @@ all_lists={"accept":[],
 
 serv_err_unit=None  #Used by heartbeat
 cli_err_unit=None  #Used by heartbeat
+
+hb_event=threading.Event()
