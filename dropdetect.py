@@ -88,7 +88,7 @@ def main():
 		# 	and\
 		# 	os.getuid()!=0:
 		# 	screen.notify(f"Can't start:",colour="\033[41m")
-		# 	screen.nnotify(f"Not enough permissions for port range {PARSER['start']}-{PARSER['end']}",colour="\033[41m")
+		# 	screen.nnotify(f"  Not enough permissions for port range {PARSER['start']}-{PARSER['end']}",colour="\033[41m")
 		# 	screen.getLeave()
 		# 	return 1
 
